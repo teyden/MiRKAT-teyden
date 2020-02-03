@@ -1,5 +1,3 @@
-
-
 MiRKAT_continuous = function(y, X = NULL, Ks,method = "davies", nperm = 999){
   n = length(y) 
 
