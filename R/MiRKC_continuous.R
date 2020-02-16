@@ -1,4 +1,5 @@
-MiRKAT_continuous = function(y, X = NULL, Ks,method = "davies", nperm = 999){
+MiRKC_continuous = function(y, X = NULL, Ks, method = "davies", nperm = 999){
+  print("Continuous outcome.")
   n = length(y) 
 
   if (is.null(X)) {
@@ -21,25 +22,23 @@ MiRKAT_continuous = function(y, X = NULL, Ks,method = "davies", nperm = 999){
   px  = NCOL(X1)
   
   if (class(Ks) == "matrix"){Ks = list(Ks)}
-  Qs = lapply(Ks, getQ, res, s2)  
+  Qs = lapply(Ks, getQ, res, s2)
+  
   if (method == "davies"){    
     lambda0 = lapply(Ks, getLambda_davies, P0)
+    
+    # Handle single kernel case. 
     if (length(Ks) == 1){
       p = getindivP_davies(Qs[[1]], lambda0[[1]], n, px)    
-      return(indivP = p)  # This should prevent the algorithm going any further
-    }
+      return(list(indivP = p, model = mod))
+    } 
+    
+    # Handle multiple kernels case. 
     ps = rep(NA, length(Ks))
     for (i in 1:length(Ks)){
       ps[i] = getindivP_davies(Qs[[i]], lambda0[[i]], n, px)    
     }
     minP    = min(ps)
-
-#     q_sim = sapply(1:length(Ks), function(j){
-#       sapply(1:nperm, function(i) {
-#         ind <- sample(n)
-#         Q1 = as.numeric(res %*% Ks[[j]][ind, ind] %*% res/s2) 
-#       })  
-#     }) 
     
     q_sim =  sapply(1:nperm, function(i) {
       ind <- sample(n)
@@ -56,10 +55,12 @@ MiRKAT_continuous = function(y, X = NULL, Ks,method = "davies", nperm = 999){
     
     minP_all= apply(p_all,1, min)
     p_final = rank(minP_all)[1]/(nperm  + 1)  
+    
+    print(mod)
    
-    return(list(indivP = ps , omnibus_p = p_final))    
-  } 
-  if (method == "moment"){ 
+    return(list(indivP = ps, omnibus_p = p_final))
+    
+  } else if (method == "moment"){ 
     parm    =  sapply(Ks, getParamSat, P0, px)  
     if (length(Ks) == 1){
       p_sat = getSat(Qs[[1]], keppa_tlt = parm[2,1]$keppa_tlt, niu_tlt = parm[1,1]$niu_tlt)  
@@ -70,15 +71,6 @@ MiRKAT_continuous = function(y, X = NULL, Ks,method = "davies", nperm = 999){
       p_sat[i] = getSat(Qs[[i]], keppa_tlt = parm[2,i]$keppa_tlt, niu_tlt = parm[1,i]$niu_tlt)    
     }
     minP = min(p_sat)
-#     
-#     q_sim = sapply(1:length(Ks), function(j){
-#       sapply(1:nperm, function(i) {
-#         ind <- sample(n)
-#         Q1 = as.numeric(res %*% Ks[[j]][ind, ind] %*% res/s2) # the adjusted is zero in this case 
-#       })  
-#     }) 
-#     
-    
     q_sim =  sapply(1:nperm, function(i) {
       ind <- sample(n)
       sapply(1:length(Ks),function(j){
@@ -95,24 +87,13 @@ MiRKAT_continuous = function(y, X = NULL, Ks,method = "davies", nperm = 999){
     p_final = rank(minP_all)[1]/(nperm + 1)
     
     return(list(indivP = p_sat , omnibus_p = p_final)) 
-    }
-  if (method == "permutation"){
-#     
-#     q_sim = sapply(1:length(Ks), function(j){
-#       sapply(1:nperm, function(i) {
-#         ind <- sample(n)
-#         Q1 = as.numeric(res %*% Ks[[j]][ind, ind] %*% res/s2) # the adjusted is zero in this case 
-#       })  
-#     }) 
-    
-    
+  } else if (method == "permutation"){
     q_sim =  sapply(1:nperm, function(i) {
       ind <- sample(n)
       sapply(1:length(Ks),function(j){
         Q1 = as.numeric(res %*% Ks[[j]][ind, ind] %*% res/s2) 
       })
     })  
-    
     
     if (length(Ks) == 1){
       p_perm = (sum(q_sim > Qs)+ 1)/(nperm + 1) 
@@ -129,12 +110,7 @@ MiRKAT_continuous = function(y, X = NULL, Ks,method = "davies", nperm = 999){
     p_perm = p_all[1,]
      minP_all= apply(p_all,1, min)
     p_final = rank(minP_all)[1]/(nperm + 1)
-    
-     
     # = (# of statistics permutation >= observed test statistics + 1) / (#permutation + 1)
-  
-  return(list(indivP = p_perm , omnibus_p = p_final)) 
-
+    return(list(indivP = p_perm , omnibus_p = p_final)) 
   }
-  
 }

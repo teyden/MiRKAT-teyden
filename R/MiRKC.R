@@ -1,5 +1,5 @@
-
-MiRKAT = function(y, X = NULL, Ks, out_type = "C", nperm = 999, method = "davies"){
+MiRKC = function(y, X = NULL, Ks, out_type = "C", nperm = 999, method = "davies"){
+  print("Running MiRKC, modified")
   n = length(y)
   if (any(is.na(y))){
     ids = which(is.na(y))
@@ -36,9 +36,9 @@ MiRKAT = function(y, X = NULL, Ks, out_type = "C", nperm = 999, method = "davies
   if (!(out_type %in%  c("C", "D"))){
     stop("Currently only continuous and Binary outcome are supported. Please choose out_type = \"C\" or \"D\" ")
   } else if(out_type  == "C"){
-    re = MiRKAT_continuous(y, X = X, Ks = Ks, method = method, nperm = nperm)  
+    re = MiRKC_continuous(y, X = X, Ks = Ks, method = method, nperm = nperm)  
   } else if(out_type  == "D"){
-    re = MiRKAT_binary(y, X = X, Ks = Ks, method = method, nperm = nperm)  
+    re = MiRKC_binary(y, X = X, Ks = Ks, method = method, nperm = nperm)  
   }
   return(re)
 }

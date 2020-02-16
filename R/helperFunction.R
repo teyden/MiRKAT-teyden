@@ -135,9 +135,12 @@ getIndivP_hm = function(K, res, mu, D0, P0){
   return(list(p_hm= p_corrected, Q = Q, muQ = muQ, varQ = varQ, df = df))
 }
 
-getIndivP_binary = function(K, res, D0, px, P0){
+MiRKC.getIndivP_binary = function(K, res, D0, px, P0){
   n = length(res)
-  Q <- as.numeric(res %*% K %*% res) 
+  
+  # Transpose res as it is not the correct dimension. (That was sloppily coded, lol).
+  Q <- as.numeric(t(res) %*% K %*% res) 
+  
   PKP = P0 %*% (D0*t(D0 * K)) %*% P0 
   eP0 = c(rep(1, n-px), rep(0, px))
   ePKP = eigen(PKP, symmetric = T)$values
