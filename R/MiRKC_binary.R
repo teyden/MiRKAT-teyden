@@ -130,7 +130,7 @@ MiRKC_binary = function(y, X = NULL, Ks, family= "binomial", nperm = 999, method
     
     S = sapply(Ks, MiRKC.getIndivP_binary, res, D0, px, P0)
     ps = as.numeric(unlist(S[3,]))
-    if (length(Ks) ==1){
+    if (length(Ks) == 1){
       return(list(indivP = ps, model = mod))
     }
     eP0 = c(rep(1, n-px), rep(0, px))
