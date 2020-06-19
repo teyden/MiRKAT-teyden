@@ -1,5 +1,6 @@
-MiRKC = function(y, X = NULL, Ks, out_type = "C", nperm = 999, method = "davies"){
-  print("Running MiRKC, modified")
+MiRKC = function(y, X = NULL, Ks, out_type = "C", nperm = 999, method = "davies", verbose = FALSE){
+  if (verbose) print("Running MiRKC, modified")
+
   n = length(y)
   if (any(is.na(y))){
     ids = which(is.na(y))
